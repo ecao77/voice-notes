@@ -3,18 +3,25 @@ import { useEffect } from 'react';
 import '../styles/globals.css';
 
 function MyApp({ Component, pageProps }) {
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      // This code only runs on the server
-      console.log('Importing setupDb');
-      import('../lib/db').then(({ setupDb }) => {
-        console.log('Running setupDb');
-        setupDb().catch(err => console.error('Error setting up database:', err));
-      });
-    }
-  }, []);
+    useEffect(() => {
+        async function setup() {
+        if (typeof window === 'undefined') {
+            // This code only runs on the server
+            try {
+            console.log('Importing setupDb');
+            const { setupDb } = await import('../lib/db');
+            console.log('Running setupDb');
+            await setupDb();
+            console.log('Database setup completed successfully');
+            } catch (error) {
+            console.error('Error during database setup:', error);
+            }
+        }
+        }
+        setup();
+    }, []);
 
-  return <Component {...pageProps} />;
+    return <Component {...pageProps} />;
 }
 
 export default MyApp;
